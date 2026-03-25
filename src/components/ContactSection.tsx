@@ -107,10 +107,6 @@ const ContactSection = () => {
               </div>
             </div>
 
-            <div className="glass-card p-6 flex-1">
-              <h4 className="font-display text-sm font-semibold mb-2 gradient-text">Email</h4>
-              <p className="font-body text-xs text-muted-foreground break-all">suganeshranganathan3@gmail.com</p>
-            </div>
           </motion.div>
         </div>
 

@@ -5,7 +5,7 @@ const Footer = () => (
     <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
       <div className="flex items-center gap-2 font-display text-sm font-bold gradient-text">
         <Cpu className="w-4 h-4 text-primary" />
-        Suganesh Ranganathan
+        Suganesh
       </div>
       <p className="font-body text-xs text-muted-foreground">
         © {new Date().getFullYear()} — Built with passion for embedded systems

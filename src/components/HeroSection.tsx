@@ -33,8 +33,6 @@ const HeroSection = () => {
             className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold mb-4 gradient-text leading-tight"
           >
             Suganesh
-            <br />
-            Ranganathan
           </motion.h1>
 
           <motion.p

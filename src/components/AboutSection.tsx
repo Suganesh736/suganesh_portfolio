@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Cpu, Zap, Wifi, GraduationCap } from "lucide-react";
+import { Cpu, Zap, Wifi, GraduationCap, Pencil } from "lucide-react";
 
 const timeline = [
   { year: "2023", title: "Started Engineering", desc: "Began B.E. journey with a focus on electronics and embedded systems" },
@@ -27,6 +27,9 @@ const AboutSection = () => {
         >
           <p className="text-primary font-mono text-sm tracking-widest uppercase mb-2">Get to know me</p>
           <h2 className="font-display text-3xl sm:text-4xl font-bold gradient-text">About Me</h2>
+          <button className="inline-flex items-center gap-1.5 px-4 py-2 mt-4 text-xs font-mono bg-muted/30 border border-glass-border/30 rounded-lg text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
+            <Pencil className="w-3 h-3" /> Edit About
+          </button>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
@@ -38,7 +41,7 @@ const AboutSection = () => {
           >
             <div className="glass-card p-8 neon-glow-purple">
               <p className="font-body text-foreground/80 leading-relaxed mb-6">
-                I'm <span className="text-primary font-semibold">Suganesh Ranganathan</span>, a second-year engineering student 
+                I'm <span className="text-primary font-semibold">Suganesh</span>, a second-year engineering student 
                 with an intense passion for <span className="text-secondary">embedded systems</span> and IoT development. 
                 I believe in bridging the gap between software and hardware to create impactful, real-world solutions.
               </p>
