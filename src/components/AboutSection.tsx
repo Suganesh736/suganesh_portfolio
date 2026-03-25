@@ -38,7 +38,7 @@ const AboutSection = () => {
           >
             <div className="glass-card p-8 neon-glow-purple">
               <p className="font-body text-foreground/80 leading-relaxed mb-6">
-                I'm <span className="text-primary font-semibold">Suganesh Ranganathan</span>, a second-year engineering student 
+                I'm <span className="text-primary font-semibold">Suganesh</span>, a second-year engineering student 
                 with an intense passion for <span className="text-secondary">embedded systems</span> and IoT development. 
                 I believe in bridging the gap between software and hardware to create impactful, real-world solutions.
               </p>
