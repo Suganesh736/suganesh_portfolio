@@ -1,3 +1,5 @@
+import { AdminProvider } from "@/context/AdminContext";
+import PasswordDialog from "@/components/PasswordDialog";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import AboutSection from "@/components/AboutSection";
@@ -7,15 +9,18 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
 const Index = () => (
-  <div className="min-h-screen">
-    <Navbar />
-    <HeroSection />
-    <AboutSection />
-    <SkillsSection />
-    <ProjectsSection />
-    <ContactSection />
-    <Footer />
-  </div>
+  <AdminProvider>
+    <div className="min-h-screen">
+      <Navbar />
+      <HeroSection />
+      <AboutSection />
+      <SkillsSection />
+      <ProjectsSection />
+      <ContactSection />
+      <Footer />
+      <PasswordDialog />
+    </div>
+  </AdminProvider>
 );
 
 export default Index;
