@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Cpu, Wifi, Radio, ParkingSquare } from "lucide-react";
+import { X, ExternalLink, Cpu, Wifi, Radio, ParkingSquare, Pencil, Plus } from "lucide-react";
 
 const projects = [
   {
