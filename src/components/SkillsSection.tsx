@@ -52,6 +52,9 @@ const SkillsSection = () => {
         >
           <p className="text-secondary font-mono text-sm tracking-widest uppercase mb-2">What I Work With</p>
           <h2 className="font-display text-3xl sm:text-4xl font-bold gradient-text">Skills & Tools</h2>
+          <button className="inline-flex items-center gap-1.5 px-4 py-2 mt-4 text-xs font-mono bg-muted/30 border border-glass-border/30 rounded-lg text-muted-foreground hover:text-primary hover:border-primary/40 transition-all">
+            <Pencil className="w-3 h-3" /> Edit Skills
+          </button>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-8">
