@@ -1,5 +1,6 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import { Pencil } from "lucide-react";
 
 const skillCategories = [
   {
