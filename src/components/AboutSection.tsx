@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
 import { useRef } from "react";
-import { Cpu, Zap, Wifi, GraduationCap } from "lucide-react";
+import { Cpu, Zap, Wifi, GraduationCap, Pencil } from "lucide-react";
 
 const timeline = [
   { year: "2023", title: "Started Engineering", desc: "Began B.E. journey with a focus on electronics and embedded systems" },
