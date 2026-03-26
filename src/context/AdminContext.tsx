@@ -1,19 +1,17 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
-const ADMIN_PASSWORD = "4646";
+const DEFAULT_PASSWORD = "4646";
 
 interface AdminContextType {
-  isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
   requestAuth: (onSuccess: () => void) => void;
   showPasswordDialog: boolean;
   setShowPasswordDialog: (v: boolean) => void;
+  pendingAction: (() => void) | null;
+  currentPassword: string;
+  verifyPassword: (password: string) => boolean;
   showChangePassword: boolean;
   setShowChangePassword: (v: boolean) => void;
-  pendingAction: (() => void) | null;
   changePassword: (oldPw: string, newPw: string) => boolean;
-  currentPassword: string;
 }
 
 const AdminContext = createContext<AdminContextType | null>(null);
@@ -25,34 +23,29 @@ export const useAdmin = () => {
 };
 
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const [currentPassword, setCurrentPassword] = useState(ADMIN_PASSWORD);
+  const [currentPassword, setCurrentPassword] = useState(() => {
+    try {
+      return localStorage.getItem("portfolio_admin_pw") || DEFAULT_PASSWORD;
+    } catch { return DEFAULT_PASSWORD; }
+  });
 
-  const login = useCallback((password: string) => {
-    if (password === currentPassword) {
-      setIsAuthenticated(true);
-      return true;
-    }
-    return false;
-  }, [currentPassword]);
-
-  const logout = useCallback(() => setIsAuthenticated(false), []);
-
+  // Every edit action always asks for password - no session
   const requestAuth = useCallback((onSuccess: () => void) => {
-    if (isAuthenticated) {
-      onSuccess();
-    } else {
-      setPendingAction(() => onSuccess);
-      setShowPasswordDialog(true);
-    }
-  }, [isAuthenticated]);
+    setPendingAction(() => onSuccess);
+    setShowPasswordDialog(true);
+  }, []);
+
+  const verifyPassword = useCallback((password: string) => {
+    return password === currentPassword;
+  }, [currentPassword]);
 
   const changePassword = useCallback((oldPw: string, newPw: string) => {
     if (oldPw === currentPassword) {
       setCurrentPassword(newPw);
+      try { localStorage.setItem("portfolio_admin_pw", newPw); } catch {}
       return true;
     }
     return false;
@@ -60,10 +53,9 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AdminContext.Provider value={{
-      isAuthenticated, login, logout, requestAuth,
-      showPasswordDialog, setShowPasswordDialog,
-      showChangePassword, setShowChangePassword,
-      pendingAction, changePassword, currentPassword
+      requestAuth, showPasswordDialog, setShowPasswordDialog,
+      pendingAction, currentPassword, verifyPassword,
+      showChangePassword, setShowChangePassword, changePassword
     }}>
       {children}
     </AdminContext.Provider>
