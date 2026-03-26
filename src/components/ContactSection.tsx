@@ -3,10 +3,10 @@ import { motion, useInView } from "framer-motion";
 import { Send, CheckCircle, Github, Linkedin, Instagram, Youtube } from "lucide-react";
 
 const socials = [
-  { icon: Github, label: "GitHub", href: "#" },
-  { icon: Linkedin, label: "LinkedIn", href: "#" },
-  { icon: Instagram, label: "Instagram", href: "#" },
-  { icon: Youtube, label: "YouTube", href: "#" },
+  { icon: Github, label: "GitHub", href: "https://github.com/Suganesh736" },
+  { icon: Linkedin, label: "LinkedIn", href: "https://www.linkedin.com/in/suganesh07" },
+  { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/mr__suganesh__" },
+  { icon: Youtube, label: "YouTube", href: "https://youtube.com/@suganesh_46" },
 ];
 
 const ContactSection = () => {
