@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { ArrowDown, FolderOpen, FileDown } from "lucide-react";
 import ParticlesBackground from "./ParticlesBackground";
+import ThreeBackground from "./ThreeBackground";
 
 const HeroSection = () => {
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <ParticlesBackground />
+      <ThreeBackground />
 
       {/* Gradient orbs */}
       <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse-glow" />
@@ -69,7 +71,7 @@ const HeroSection = () => {
               View Projects
             </motion.a>
             <motion.a
-              href="#contact"
+              href="#downloads"
               whileHover={{ scale: 1.05, boxShadow: "0 0 30px hsl(200 100% 55% / 0.3)" }}
               whileTap={{ scale: 0.95 }}
               className="inline-flex items-center gap-2 px-8 py-3.5 border border-secondary/50 text-secondary font-body font-semibold rounded-lg hover:bg-secondary/10 transition-all"
