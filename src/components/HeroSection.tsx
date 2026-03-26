@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { ArrowDown, FolderOpen, FileDown } from "lucide-react";
 import ParticlesBackground from "./ParticlesBackground";
+import ThreeBackground from "./ThreeBackground";
 
 const HeroSection = () => {
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <ParticlesBackground />
+      <ThreeBackground />
 
       {/* Gradient orbs */}
       <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse-glow" />
