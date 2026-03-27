@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Send, CheckCircle, Github, Linkedin, Instagram, Youtube } from "lucide-react";
+import { Send, CheckCircle, Github, Linkedin, Instagram, Youtube, Loader2 } from "lucide-react";
+import emailjs from "@emailjs/browser";
 
 const socials = [
   { icon: Github, label: "GitHub", href: "https://github.com/Suganesh736" },
@@ -9,17 +10,53 @@ const socials = [
   { icon: Youtube, label: "YouTube", href: "https://youtube.com/@suganesh_46" },
 ];
 
+// Replace these with your actual EmailJS credentials
+const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
+const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
+const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
+
 const ContactSection = () => {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const ref = useRef(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = "Name is required";
+    if (!form.email.trim()) errs.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = "Enter a valid email";
+    if (!form.message.trim()) errs.message = "Message is required";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-    setForm({ name: "", email: "", message: "" });
+    if (!validate()) return;
+
+    setStatus("sending");
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          from_name: form.name,
+          from_email: form.email,
+          message: form.message,
+          to_email: "suganeshranganathan3@gmail.com",
+        },
+        EMAILJS_PUBLIC_KEY
+      );
+      setStatus("sent");
+      setForm({ name: "", email: "", message: "" });
+      setTimeout(() => setStatus("idle"), 4000);
+    } catch {
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 4000);
+    }
   };
 
   return (
@@ -39,44 +76,60 @@ const ContactSection = () => {
 
         <div className="grid md:grid-cols-5 gap-8">
           <motion.form
+            ref={formRef}
             initial={{ opacity: 0, x: -30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ delay: 0.3 }}
             onSubmit={handleSubmit}
             className="md:col-span-3 glass-card p-6 sm:p-8 space-y-5"
           >
-            {[
-              { key: "name", label: "Name", type: "text" },
-              { key: "email", label: "Email", type: "email" },
-            ].map((f) => (
-              <div key={f.key}>
-                <label className="font-body text-sm text-muted-foreground mb-1.5 block">{f.label}</label>
-                <input
-                  type={f.type}
-                  required
-                  value={form[f.key as keyof typeof form]}
-                  onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                  className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
-                />
-              </div>
-            ))}
+            <div>
+              <label className="font-body text-sm text-muted-foreground mb-1.5 block">Name</label>
+              <input
+                type="text"
+                placeholder="Enter your name"
+                value={form.name}
+                onChange={(e) => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: "" }); }}
+                className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(139,92,246,0.15)] transition-all"
+              />
+              {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
+            </div>
+
+            <div>
+              <label className="font-body text-sm text-muted-foreground mb-1.5 block">Email</label>
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                value={form.email}
+                onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: "" }); }}
+                className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(139,92,246,0.15)] transition-all"
+              />
+              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
+            </div>
+
             <div>
               <label className="font-body text-sm text-muted-foreground mb-1.5 block">Message</label>
               <textarea
-                required
                 rows={4}
+                placeholder="Type your message here..."
                 value={form.message}
-                onChange={(e) => setForm({ ...form, message: e.target.value })}
-                className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all resize-none"
+                onChange={(e) => { setForm({ ...form, message: e.target.value }); setErrors({ ...errors, message: "" }); }}
+                className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(139,92,246,0.15)] transition-all resize-none"
               />
+              {errors.message && <p className="text-destructive text-xs mt-1">{errors.message}</p>}
             </div>
+
             <motion.button
               type="submit"
+              disabled={status === "sending"}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full py-3 bg-primary text-primary-foreground font-body font-semibold rounded-lg flex items-center justify-center gap-2 neon-glow-purple transition-all"
+              className="w-full py-3 bg-primary text-primary-foreground font-body font-semibold rounded-lg flex items-center justify-center gap-2 neon-glow-purple transition-all disabled:opacity-70"
             >
-              {sent ? <><CheckCircle className="w-4 h-4" /> Sent!</> : <><Send className="w-4 h-4" /> Send Message</>}
+              {status === "sending" && <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>}
+              {status === "sent" && <><CheckCircle className="w-4 h-4" /> Message sent successfully!</>}
+              {status === "error" && "Failed to send. Try again."}
+              {status === "idle" && <><Send className="w-4 h-4" /> Send Message</>}
             </motion.button>
           </motion.form>
 
@@ -106,11 +159,9 @@ const ContactSection = () => {
                 ))}
               </div>
             </div>
-
           </motion.div>
         </div>
 
-        {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
