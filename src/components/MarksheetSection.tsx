@@ -100,7 +100,7 @@ const MarksheetSection = () => {
   /* ── PDF Generation ── */
   const handleDownloadPdf = () => {
     const doc = new jsPDF();
-    const purple = [124, 58, 237];
+    const purple: [number, number, number] = [124, 58, 237];
 
     doc.setFontSize(20);
     doc.setTextColor(purple[0], purple[1], purple[2]);
