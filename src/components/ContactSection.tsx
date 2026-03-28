@@ -81,39 +81,98 @@ const ContactSection = () => {
             onSubmit={handleSubmit}
             className="md:col-span-3 glass-card p-6 sm:p-8 space-y-5"
           >
+            <div>
+              <label className="font-body text-sm text-muted-foreground mb-1.5 block">Name</label>
+              <input
+                type="text"
+                placeholder="Enter your name"
+                value={form.name}
+                onChange={(e) => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: "" }); }}
+                className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(139,92,246,0.15)] transition-all"
+              />
+              {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
+            </div>
 
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg"
-            />
+            <div>
+              <label className="font-body text-sm text-muted-foreground mb-1.5 block">Email</label>
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                value={form.email}
+                onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: "" }); }}
+                className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(139,92,246,0.15)] transition-all"
+              />
+              {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
+            </div>
 
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg"
-            />
+            <div>
+              <label className="font-body text-sm text-muted-foreground mb-1.5 block">Message</label>
+              <textarea
+                rows={4}
+                placeholder="Type your message here..."
+                value={form.message}
+                onChange={(e) => { setForm({ ...form, message: e.target.value }); setErrors({ ...errors, message: "" }); }}
+                className="w-full px-4 py-3 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 focus:shadow-[0_0_15px_rgba(139,92,246,0.15)] transition-all resize-none"
+              />
+              {errors.message && <p className="text-destructive text-xs mt-1">{errors.message}</p>}
+            </div>
 
-            <textarea
-              placeholder="Type your message..."
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg"
-            />
-
-            <button type="submit" disabled={status === "sending"}>
-              {status === "sending" && "Sending..."}
-              {status === "sent" && "Message Sent ✅"}
-              {status === "error" && "Failed ❌"}
-              {status === "idle" && "Send Message"}
-            </button>
-
+            <motion.button
+              type="submit"
+              disabled={status === "sending"}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full py-3 bg-primary text-primary-foreground font-body font-semibold rounded-lg flex items-center justify-center gap-2 neon-glow-purple transition-all disabled:opacity-70"
+            >
+              {status === "sending" && <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>}
+              {status === "sent" && <><CheckCircle className="w-4 h-4" /> Message sent successfully!</>}
+              {status === "error" && "Failed to send. Try again."}
+              {status === "idle" && <><Send className="w-4 h-4" /> Send Message</>}
+            </motion.button>
           </motion.form>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ delay: 0.5 }}
+            className="md:col-span-2 flex flex-col gap-4"
+          >
+            <div className="glass-card p-6">
+              <h4 className="font-display text-sm font-semibold mb-4 gradient-text">Connect</h4>
+              <div className="space-y-3">
+                {socials.map(({ icon: Icon, label, href }) => (
+                  <motion.a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ x: 4 }}
+                    className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors group"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-muted/30 flex items-center justify-center group-hover:bg-primary/10 group-hover:neon-glow-purple transition-all">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="font-body text-sm">{label}</span>
+                  </motion.a>
+                ))}
+              </div>
+            </div>
+          </motion.div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.7 }}
+          className="mt-20 text-center glass-card p-10 neon-glow-purple"
+        >
+          <h3 className="font-display text-2xl sm:text-3xl font-bold gradient-text mb-3">
+            Let's build something amazing together
+          </h3>
+          <p className="font-body text-muted-foreground text-sm max-w-lg mx-auto">
+            I'm always open to collaborating on innovative embedded systems and IoT projects.
+          </p>
+        </motion.div>
       </div>
     </section>
   );
