@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { X, ExternalLink, Cpu, Wifi, Radio, ParkingSquare, Pencil, Plus, Image, Trash2, Save } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
+import { loadContent, saveContent, uploadFile } from "@/lib/portfolio-db";
 
 interface Project {
   title: string;
@@ -17,32 +18,28 @@ const iconMap: Record<string, any> = { Cpu, Wifi, Radio, ParkingSquare };
 
 const defaultProjects: Project[] = [
   {
-    title: "Line Follower Robot",
-    iconName: "Cpu",
+    title: "Line Follower Robot", iconName: "Cpu",
     description: "An autonomous robot that follows a predefined path using IR sensors and motor control algorithms.",
     components: ["Arduino Uno", "IR Sensors (x3)", "L298N Motor Driver", "DC Motors", "Chassis"],
     working: "The IR sensors detect the black line on a white surface. The Arduino processes sensor data and adjusts motor speeds via the L298N driver to keep the robot aligned on the path. PID control logic ensures smooth turning.",
     gradient: "from-primary to-accent",
   },
   {
-    title: "Automatic Accident Detector & SMS Alert",
-    iconName: "Radio",
+    title: "Automatic Accident Detector & SMS Alert", iconName: "Radio",
     description: "A system that detects vehicle accidents using sensors and immediately sends an SMS alert with GPS coordinates to emergency contacts.",
     components: ["Arduino Mega", "MPU6050 Accelerometer", "GSM Module (SIM800L)", "GPS Module (NEO-6M)", "Buzzer"],
     working: "The MPU6050 accelerometer detects sudden impact or tilt changes. When values exceed the threshold, the Arduino triggers the GSM module to send an SMS with GPS coordinates to pre-configured emergency numbers.",
     gradient: "from-destructive to-primary",
   },
   {
-    title: "Support System for Aged People",
-    iconName: "Wifi",
+    title: "Support System for Aged People", iconName: "Wifi",
     description: "An IoT-based health monitoring and emergency alert system designed for elderly care.",
     components: ["ESP32", "Pulse Oximeter (MAX30100)", "Temperature Sensor", "Push Button", "Buzzer", "OLED Display"],
     working: "Continuously monitors heart rate and body temperature using ESP32. Data is displayed on the OLED. An emergency button sends an instant alert notification. Data can also be monitored remotely via a web dashboard.",
     gradient: "from-secondary to-neon-cyan",
   },
   {
-    title: "Smart Parking System",
-    iconName: "ParkingSquare",
+    title: "Smart Parking System", iconName: "ParkingSquare",
     description: "An automated parking management system that detects available slots and displays real-time availability.",
     components: ["Arduino Nano", "Ultrasonic Sensors (x4)", "Servo Motor", "LCD Display (16x2)", "LED Indicators"],
     working: "Ultrasonic sensors detect vehicles in each parking slot. The Arduino counts available spots and displays them on the LCD. The servo motor controls the entry gate barrier, opening only when spots are available.",
@@ -58,22 +55,13 @@ const gradientOptions = [
   "from-primary to-secondary",
 ];
 
-const loadProjects = (): Project[] => {
-  try {
-    const saved = localStorage.getItem("portfolio_projects");
-    return saved ? JSON.parse(saved) : defaultProjects;
-  } catch { return defaultProjects; }
-};
-
-const saveProjects = (p: Project[]) => localStorage.setItem("portfolio_projects", JSON.stringify(p));
-
 const emptyProject: Project = {
   title: "", iconName: "Cpu", description: "", components: [], working: "",
   gradient: "from-primary to-accent", image: "",
 };
 
 const ProjectsSection = () => {
-  const [projects, setProjects] = useState<Project[]>(loadProjects);
+  const [projects, setProjects] = useState<Project[]>(defaultProjects);
   const [selected, setSelected] = useState<number | null>(null);
   const [editMode, setEditMode] = useState<"edit" | "add" | null>(null);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -82,6 +70,10 @@ const ProjectsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { requestAuth } = useAdmin();
+
+  useEffect(() => {
+    loadContent<Project[]>("projects", defaultProjects).then(setProjects);
+  }, []);
 
   const openEditProject = (index: number) => {
     requestAuth(() => {
@@ -101,7 +93,7 @@ const ProjectsSection = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const updated = { ...editForm, components: componentsInput.split(",").map(s => s.trim()).filter(Boolean) };
     let newProjects: Project[];
     if (editMode === "edit" && editIndex !== null) {
@@ -111,26 +103,23 @@ const ProjectsSection = () => {
       newProjects = [...projects, updated];
     }
     setProjects(newProjects);
-    saveProjects(newProjects);
     setEditMode(null);
+    await saveContent("projects", newProjects);
   };
 
   const handleDelete = (index: number) => {
-    requestAuth(() => {
+    requestAuth(async () => {
       const newProjects = projects.filter((_, i) => i !== index);
       setProjects(newProjects);
-      saveProjects(newProjects);
+      await saveContent("projects", newProjects);
     });
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setEditForm({ ...editForm, image: ev.target?.result as string });
-    };
-    reader.readAsDataURL(file);
+    const url = await uploadFile(file, `projects/${Date.now()}.${file.name.split('.').pop()}`);
+    setEditForm({ ...editForm, image: url });
   };
 
   return (

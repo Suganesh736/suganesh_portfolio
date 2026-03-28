@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Pencil, X, Save, Plus, Trash2 } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
+import { loadContent, saveContent } from "@/lib/portfolio-db";
 
 interface Skill { name: string; level: number; }
 interface SkillCategory { title: string; color: string; skills: Skill[]; }
@@ -21,21 +22,17 @@ const defaultSkillCategories: SkillCategory[] = [
   },
 ];
 
-const loadSkills = (): SkillCategory[] => {
-  try {
-    const saved = localStorage.getItem("portfolio_skills");
-    return saved ? JSON.parse(saved) : defaultSkillCategories;
-  } catch { return defaultSkillCategories; }
-};
-const saveSkills = (s: SkillCategory[]) => localStorage.setItem("portfolio_skills", JSON.stringify(s));
-
 const SkillsSection = () => {
-  const [categories, setCategories] = useState<SkillCategory[]>(loadSkills);
+  const [categories, setCategories] = useState<SkillCategory[]>(defaultSkillCategories);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<SkillCategory[]>([]);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { requestAuth } = useAdmin();
+
+  useEffect(() => {
+    loadContent<SkillCategory[]>("skills", defaultSkillCategories).then(setCategories);
+  }, []);
 
   const openEdit = () => {
     requestAuth(() => {
@@ -44,10 +41,10 @@ const SkillsSection = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setCategories(editData);
-    saveSkills(editData);
     setEditMode(false);
+    await saveContent("skills", editData);
   };
 
   const updateSkill = (ci: number, si: number, field: keyof Skill, value: string | number) => {

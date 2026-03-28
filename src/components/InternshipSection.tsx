@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Briefcase, Pencil, X, Save, Plus, Trash2, Calendar, Building2, MapPin, Image, FileText, Download, Upload } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
+import { loadContent, saveContent, uploadFile } from "@/lib/portfolio-db";
 
 interface Internship {
   company: string;
@@ -31,25 +32,20 @@ const defaultInternships: Internship[] = [
   },
 ];
 
-const loadInternships = (): Internship[] => {
-  try {
-    const saved = localStorage.getItem("portfolio_internships");
-    return saved ? JSON.parse(saved) : defaultInternships;
-  } catch { return defaultInternships; }
-};
-const saveInternships = (data: Internship[]) => localStorage.setItem("portfolio_internships", JSON.stringify(data));
-
 const emptyInternship: Internship = { company: "", role: "", duration: "", location: "", work: "" };
-
 const inputClass = "w-full px-3 py-2 bg-muted/30 border border-glass-border/30 rounded-lg text-foreground font-body text-sm focus:outline-none focus:border-primary/50 transition-all";
 
 const InternshipSection = () => {
-  const [internships, setInternships] = useState<Internship[]>(loadInternships);
+  const [internships, setInternships] = useState<Internship[]>(defaultInternships);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<Internship[]>([]);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { requestAuth } = useAdmin();
+
+  useEffect(() => {
+    loadContent<Internship[]>("internships", defaultInternships).then(setInternships);
+  }, []);
 
   const openEdit = () => {
     requestAuth(() => {
@@ -58,10 +54,10 @@ const InternshipSection = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setInternships(editData);
-    saveInternships(editData);
     setEditMode(false);
+    await saveContent("internships", editData);
   };
 
   const updateField = (i: number, field: keyof Internship, value: string) => {
@@ -74,24 +70,23 @@ const InternshipSection = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = accept;
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const updated = [...editData];
-        updated[i] = { ...updated[i], [field]: reader.result as string };
-        setEditData(updated);
-      };
-      reader.readAsDataURL(file);
+      const folder = field === "image" ? "internship-images" : "internship-docs";
+      const url = await uploadFile(file, `${folder}/${Date.now()}.${file.name.split('.').pop()}`);
+      const updated = [...editData];
+      updated[i] = { ...updated[i], [field]: url };
+      setEditData(updated);
     };
     input.click();
   };
 
-  const handleDownload = (data: string, filename: string) => {
+  const handleDownload = (url: string, filename: string) => {
     const link = document.createElement("a");
-    link.href = data;
+    link.href = url;
     link.download = filename;
+    link.target = "_blank";
     link.click();
   };
 
@@ -137,7 +132,6 @@ const InternshipSection = () => {
                       whileHover={{ y: -4, transition: { duration: 0.3 } }}
                       className="glass-card p-6 hover:border-primary/30 transition-all group hover:neon-glow-purple"
                     >
-                      {/* Company image */}
                       {item.image && (
                         <div className="mb-4 rounded-lg overflow-hidden h-32 group">
                           <img src={item.image} alt={item.company}
@@ -170,7 +164,6 @@ const InternshipSection = () => {
 
                       <p className="font-body text-sm text-foreground/70 leading-relaxed mb-4">{item.work}</p>
 
-                      {/* Download buttons */}
                       {(item.certificate || item.offerLetter) && (
                         <div className="flex flex-wrap gap-2">
                           {item.certificate && (
@@ -230,7 +223,6 @@ const InternshipSection = () => {
                     <textarea rows={3} value={item.work} onChange={(e) => updateField(i, "work", e.target.value)} placeholder="Work description"
                       className={`${inputClass} resize-none`} />
 
-                    {/* File uploads */}
                     <div className="grid grid-cols-3 gap-2">
                       <div>
                         <button onClick={() => handleFileUpload(i, "image", "image/*")}
