@@ -1,13 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { BookOpen, Pencil, Plus, Trash2, X, Download, GraduationCap, School } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
+import { loadContent, saveContent } from "@/lib/portfolio-db";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 /* ───────── Types ───────── */
 interface SchoolRecord {
-  label: string; // "10th", "11th", "12th"
+  label: string;
   subjects: string[];
   totalMarks: number;
   maxMarks: number;
@@ -66,24 +67,18 @@ const defaultData: MarksheetData = {
   ],
 };
 
-const load = (): MarksheetData => {
-  try {
-    const d = localStorage.getItem("portfolio_marksheet_v2");
-    return d ? JSON.parse(d) : defaultData;
-  } catch {
-    return defaultData;
-  }
-};
-const save = (d: MarksheetData) => localStorage.setItem("portfolio_marksheet_v2", JSON.stringify(d));
-
 /* ───────── Component ───────── */
 const MarksheetSection = () => {
-  const [data, setData] = useState<MarksheetData>(load);
+  const [data, setData] = useState<MarksheetData>(defaultData);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<MarksheetData>(defaultData);
   const { requestAuth } = useAdmin();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    loadContent<MarksheetData>("marksheet_v2", defaultData).then(setData);
+  }, []);
 
   const openEdit = () =>
     requestAuth(() => {
@@ -91,10 +86,10 @@ const MarksheetSection = () => {
       setEditMode(true);
     });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setData(editData);
-    save(editData);
     setEditMode(false);
+    await saveContent("marksheet_v2", editData);
   };
 
   /* ── PDF Generation ── */
@@ -108,7 +103,6 @@ const MarksheetSection = () => {
 
     let y = 30;
 
-    // School records
     doc.setFontSize(14);
     doc.setTextColor(purple[0], purple[1], purple[2]);
     doc.text("School Records", 14, y);
@@ -127,7 +121,6 @@ const MarksheetSection = () => {
       y = (doc as any).lastAutoTable.finalY + 8;
     });
 
-    // College records
     doc.setFontSize(14);
     doc.setTextColor(purple[0], purple[1], purple[2]);
     doc.text("College Semesters", 14, y);
@@ -193,7 +186,6 @@ const MarksheetSection = () => {
     <section id="marksheet" className="section-padding relative overflow-hidden">
       <div className="absolute top-0 left-0 w-72 h-72 bg-secondary/10 rounded-full blur-[100px]" />
       <div className="max-w-5xl mx-auto relative z-10" ref={ref}>
-        {/* Header */}
         <motion.div initial={{ opacity: 0, y: 40 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7 }} className="text-center mb-12">
           <p className="text-secondary font-mono text-sm tracking-widest uppercase mb-2">Academic Record</p>
           <h2 className="font-display text-3xl sm:text-4xl font-bold gradient-text">Education & Marksheet</h2>
@@ -207,7 +199,7 @@ const MarksheetSection = () => {
           </div>
         </motion.div>
 
-        {/* ── School Records ── */}
+        {/* School Records */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.2 }} className="mb-10">
           <div className="flex items-center gap-2 mb-4">
             <School className="w-5 h-5 text-secondary" />
@@ -238,7 +230,7 @@ const MarksheetSection = () => {
           </div>
         </motion.div>
 
-        {/* ── College Semesters ── */}
+        {/* College Semesters */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={isInView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.5 }}>
           <div className="flex items-center gap-2 mb-4">
             <GraduationCap className="w-5 h-5 text-primary" />
@@ -289,7 +281,7 @@ const MarksheetSection = () => {
         </motion.div>
       </div>
 
-      {/* ── Edit Modal ── */}
+      {/* Edit Modal */}
       <AnimatePresence>
         {editMode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={() => setEditMode(false)}>
@@ -299,7 +291,6 @@ const MarksheetSection = () => {
                 <button onClick={() => setEditMode(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
               </div>
 
-              {/* School Editing */}
               <h4 className="font-display text-sm font-bold text-secondary mb-3">School Records</h4>
               <div className="space-y-4 mb-6">
                 {editData.school.map((rec, i) => (
@@ -321,7 +312,6 @@ const MarksheetSection = () => {
                 ))}
               </div>
 
-              {/* College Editing */}
               <h4 className="font-display text-sm font-bold text-primary mb-3">College Semesters</h4>
               <div className="space-y-4">
                 {editData.college.map((sem, si) => (

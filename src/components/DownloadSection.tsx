@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Download, FileText, FolderOpen, BookOpen, Upload, Eye } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
+import { loadContent, saveContent, uploadFile } from "@/lib/portfolio-db";
 
 interface DownloadItem {
   label: string;
@@ -15,40 +16,29 @@ const items: DownloadItem[] = [
   { label: "Marksheet", icon: BookOpen, key: "marksheet" },
 ];
 
-const loadFiles = (): Record<string, string> => {
-  try {
-    const d = localStorage.getItem("portfolio_downloads");
-    return d ? JSON.parse(d) : {};
-  } catch {
-    return {};
-  }
-};
-
-const saveFiles = (data: Record<string, string>) =>
-  localStorage.setItem("portfolio_downloads", JSON.stringify(data));
-
 const DownloadSection = () => {
-  const [files, setFiles] = useState<Record<string, string>>(loadFiles);
+  const [files, setFiles] = useState<Record<string, string>>({});
   const [previewKey, setPreviewKey] = useState<string | null>(null);
   const { requestAuth } = useAdmin();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    loadContent<Record<string, string>>("downloads", {}).then(setFiles);
+  }, []);
 
   const handleUpload = (key: string) => {
     requestAuth(() => {
       const input = document.createElement("input");
       input.type = "file";
       input.accept = ".pdf";
-      input.onchange = (e) => {
+      input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          const updated = { ...files, [key]: reader.result as string };
-          setFiles(updated);
-          saveFiles(updated);
-        };
-        reader.readAsDataURL(file);
+        const url = await uploadFile(file, `downloads/${key}_${Date.now()}.pdf`);
+        const updated = { ...files, [key]: url };
+        setFiles(updated);
+        await saveContent("downloads", updated);
       };
       input.click();
     });
@@ -60,6 +50,7 @@ const DownloadSection = () => {
     const link = document.createElement("a");
     link.href = data;
     link.download = `${label.replace(/\s+/g, "_")}_Suganesh.pdf`;
+    link.target = "_blank";
     link.click();
   };
 

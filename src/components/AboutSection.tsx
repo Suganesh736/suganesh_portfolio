@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Cpu, Zap, Wifi, GraduationCap, Pencil, X, Save } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
+import { loadContent, saveContent } from "@/lib/portfolio-db";
 
 const defaultTimeline = [
   { year: "2023", title: "Started Engineering", desc: "Began B.E. journey with a focus on electronics and embedded systems" },
@@ -15,21 +16,19 @@ const defaultBio = {
   para2: "From building line-following robots to accident detection systems, I work with Arduino, ESP32, ESP8266, and various sensors to prototype innovative hardware solutions that solve real problems.",
 };
 
-const loadAbout = () => {
-  try {
-    const saved = localStorage.getItem("portfolio_about");
-    return saved ? JSON.parse(saved) : { bio: defaultBio, timeline: defaultTimeline };
-  } catch { return { bio: defaultBio, timeline: defaultTimeline }; }
-};
-const saveAbout = (data: any) => localStorage.setItem("portfolio_about", JSON.stringify(data));
+const defaultAbout = { bio: defaultBio, timeline: defaultTimeline };
 
 const AboutSection = () => {
-  const [data, setData] = useState(loadAbout);
+  const [data, setData] = useState(defaultAbout);
   const [editMode, setEditMode] = useState(false);
-  const [editData, setEditData] = useState(data);
+  const [editData, setEditData] = useState(defaultAbout);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { requestAuth } = useAdmin();
+
+  useEffect(() => {
+    loadContent("about", defaultAbout).then(setData);
+  }, []);
 
   const openEdit = () => {
     requestAuth(() => {
@@ -38,10 +37,10 @@ const AboutSection = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setData(editData);
-    saveAbout(editData);
     setEditMode(false);
+    await saveContent("about", editData);
   };
 
   return (
