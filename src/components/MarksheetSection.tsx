@@ -21,7 +21,6 @@ interface SchoolRecord {
   subjects: SubjectMark[];
 }
 
-// மார்க்கிற்கு பதில் கிரேடு (Grade) சேர்க்கப்பட்டுள்ளது
 interface CollegeSubject {
   name: string;
   grade: string; 
@@ -73,11 +72,11 @@ const defaultData: MarksheetData = {
     {
       name: "Semester 1",
       subjects: [
-        { name: "Mathematics I", grade: "O" },
-        { name: "Physics", grade: "A+" },
-        { name: "Chemistry", grade: "A" },
-        { name: "English", grade: "O" },
-        { name: "Engineering Graphics", grade: "B+" },
+        { name: "Professional Communication", grade: "O" },
+        { name: "Programming For Problem Solving", grade: "A+" },
+        { name: "Heritage Of Tamil", grade: "A" },
+        { name: "Matrices And Calculus", grade: "O" },
+        { name: "Engineering Physics", grade: "B+" },
       ],
       sgpa: 8.2,
       cgpa: 8.2,
@@ -164,23 +163,14 @@ const MarksheetSection = () => {
   };
 
   /* ── Edit helpers ── */
-  const updateSchoolField = (i: number, field: string, val: string) => {
+  const updateCollegeField = (si: number, field: "sgpa" | "cgpa" | "name", val: string | number) => {
     setEditData((prev) => {
       const d = JSON.parse(JSON.stringify(prev));
-      (d.school[i] as any)[field] = val;
+      (d.college[si] as any)[field] = val;
       return d;
     });
   };
 
-  const updateSchoolSubject = (i: number, j: number, field: keyof SubjectMark, val: string | number) => {
-    setEditData((prev) => {
-      const d = JSON.parse(JSON.stringify(prev));
-      (d.school[i].subjects[j] as any)[field] = val;
-      return d;
-    });
-  };
-
-  // காலேஜ் கிரேடு அப்டேட் செய்ய
   const updateCollegeSubject = (si: number, sj: number, key: keyof CollegeSubject, val: string) => {
     setEditData((prev) => {
       const d = JSON.parse(JSON.stringify(prev));
@@ -192,7 +182,7 @@ const MarksheetSection = () => {
   const addCollegeSubject = (si: number) => {
     setEditData((prev) => {
       const d = JSON.parse(JSON.stringify(prev));
-      d.college[si].subjects.push({ name: "New Subject", grade: "A" });
+      d.college[si].subjects.push({ name: "New Subject", grade: "O" });
       return d;
     });
   };
@@ -221,7 +211,11 @@ const MarksheetSection = () => {
     });
   };
 
-  const inp = "px-3 py-1.5 bg-muted/30 border border-glass-border/30 rounded text-foreground font-body text-xs focus:outline-none focus:border-primary/50 transition-all";
+  // Input styling
+  const inp = "px-3 py-1.5 bg-muted/40 border border-glass-border/40 rounded text-foreground font-body text-xs focus:outline-none focus:border-primary/70 transition-all";
+  
+  // High contrast select for better visibility
+  const selectInp = "px-3 py-1.5 bg-white text-black border border-primary/50 rounded font-bold text-xs focus:outline-none focus:ring-2 focus:ring-primary transition-all cursor-pointer";
 
   return (
     <section id="marksheet" className="section-padding relative overflow-hidden">
@@ -240,7 +234,7 @@ const MarksheetSection = () => {
           </div>
         </motion.div>
 
-        {/* ═══ School Records (No Change) ═══ */}
+        {/* ═══ School Records ═══ */}
         <div className="mb-10">
           <div className="flex items-center gap-2 mb-6">
             <School className="w-5 h-5 text-secondary" />
@@ -248,7 +242,7 @@ const MarksheetSection = () => {
           </div>
           <div className="space-y-6">
             {data.school.map((rec, i) => (
-              <div key={i} className="glass-card p-6">
+              <div key={i} className="glass-card p-6 hover:neon-glow-purple transition-all duration-300">
                 <h4 className="font-display text-lg font-bold text-primary mb-4">{rec.label}</h4>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
@@ -267,7 +261,7 @@ const MarksheetSection = () => {
                           <td className="py-2 px-3 text-center text-foreground">{sub.marks}</td>
                           <td className="py-2 px-3 text-center text-muted-foreground">{sub.maxMarks}</td>
                           <td className="py-2 px-3 text-center">
-                            <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary">
+                            <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">
                               {((sub.marks / sub.maxMarks) * 100).toFixed(0)}%
                             </span>
                           </td>
@@ -281,7 +275,7 @@ const MarksheetSection = () => {
           </div>
         </div>
 
-        {/* ═══ College Semesters (Changed to Grade) ═══ */}
+        {/* ═══ College Semesters ═══ */}
         <div>
           <div className="flex items-center gap-2 mb-4">
             <GraduationCap className="w-5 h-5 text-primary" />
@@ -290,11 +284,11 @@ const MarksheetSection = () => {
           <div className="space-y-6">
             {data.college.map((sem, si) => (
               <div key={si} className="glass-card p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                   <h4 className="font-display text-lg font-bold text-foreground">{sem.name}</h4>
                   <div className="flex gap-3">
-                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20">SGPA: {sem.sgpa}</span>
-                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">CGPA: {sem.cgpa}</span>
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20 font-bold">SGPA: {sem.sgpa}</span>
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold">CGPA: {sem.cgpa}</span>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -308,7 +302,7 @@ const MarksheetSection = () => {
                     <tbody>
                       {sem.subjects.map((sub, sj) => (
                         <tr key={sj} className="border-b border-glass-border/10">
-                          <td className="py-2 px-3 text-foreground">{sub.name}</td>
+                          <td className="py-2 px-3 text-foreground font-medium">{sub.name}</td>
                           <td className="py-2 px-3 text-center">
                             <span className={`font-mono font-bold text-sm ${sub.grade === 'U' ? 'text-red-400' : 'text-primary'}`}>
                               {sub.grade}
@@ -325,49 +319,89 @@ const MarksheetSection = () => {
         </div>
       </div>
 
-      {/* ═══ Edit Modal (College Part Modified) ═══ */}
+      {/* ═══ Edit Modal ═══ */}
       <AnimatePresence>
         {editMode && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={() => setEditMode(false)}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/90 backdrop-blur-md" onClick={() => setEditMode(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="glass-card neon-glow-purple p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-display text-lg font-bold gradient-text">Edit Marksheet</h3>
-                <button onClick={() => setEditMode(false)} className="text-muted-foreground"><X className="w-5 h-5" /></button>
+                <h3 className="font-display text-xl font-bold gradient-text">Edit Marksheet</h3>
+                <button onClick={() => setEditMode(false)} className="text-muted-foreground hover:text-white"><X className="w-6 h-6" /></button>
               </div>
 
               {/* College Edit Section */}
-              <h4 className="font-display text-sm font-bold text-primary mb-3">College Semesters (Grades)</h4>
-              <div className="space-y-4">
+              <h4 className="font-display text-sm font-bold text-primary mb-3">College Semesters (Manual GPA Entry)</h4>
+              <div className="space-y-6">
                 {editData.college.map((sem, si) => (
-                  <div key={si} className="border border-glass-border/20 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <input value={sem.name} onChange={(e) => { const d = JSON.parse(JSON.stringify(editData)); d.college[si].name = e.target.value; setEditData(d); }} className={`flex-1 ${inp}`} />
-                      <button onClick={() => removeSemester(si)} className="text-destructive"><Trash2 className="w-4 h-4" /></button>
+                  <div key={si} className="border border-glass-border/30 rounded-lg p-5 bg-black/20">
+                    <div className="flex items-center gap-2 mb-4">
+                      <input value={sem.name} onChange={(e) => updateCollegeField(si, "name", e.target.value)} className={`flex-1 ${inp}`} />
+                      <button onClick={() => removeSemester(si)} className="text-destructive hover:scale-110 transition-transform"><Trash2 className="w-4 h-4" /></button>
                     </div>
-                    {sem.subjects.map((sub, sj) => (
-                      <div key={sj} className="flex gap-2 mb-2 items-center">
-                        <input value={sub.name} onChange={(e) => updateCollegeSubject(si, sj, "name", e.target.value)} placeholder="Subject" className={`flex-1 ${inp}`} />
-                        <select 
-                          value={sub.grade} 
-                          onChange={(e) => updateCollegeSubject(si, sj, "grade", e.target.value)}
-                          className={`w-24 ${inp}`}
-                        >
-                          {["O", "A+", "A", "B+", "B", "C", "U"].map(g => (
-                            <option key={g} value={g}>{g}</option>
-                          ))}
-                        </select>
-                        <button onClick={() => removeCollegeSubject(si, sj)} className="text-destructive/60"><Trash2 className="w-3 h-3" /></button>
+
+                    {/* Manual GPA Inputs */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-secondary uppercase font-bold tracking-tighter">Semester SGPA</label>
+                        <input 
+                          type="number" 
+                          step="0.01" 
+                          value={sem.sgpa} 
+                          onChange={(e) => updateCollegeField(si, "sgpa", parseFloat(e.target.value) || 0)} 
+                          className={`w-full text-center font-bold ${inp}`} 
+                        />
                       </div>
-                    ))}
-                    <button onClick={() => addCollegeSubject(si)} className="text-xs text-primary flex items-center gap-1 mt-2 underline"><Plus className="w-3 h-3" /> Add Subject</button>
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-primary uppercase font-bold tracking-tighter">Overall CGPA</label>
+                        <input 
+                          type="number" 
+                          step="0.01" 
+                          value={sem.cgpa} 
+                          onChange={(e) => updateCollegeField(si, "cgpa", parseFloat(e.target.value) || 0)} 
+                          className={`w-full text-center font-bold ${inp}`} 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-[10px] text-muted-foreground font-mono">Subjects & Grades</p>
+                      {sem.subjects.map((sub, sj) => (
+                        <div key={sj} className="flex gap-2 items-center">
+                          <input value={sub.name} onChange={(e) => updateCollegeSubject(si, sj, "name", e.target.value)} placeholder="Subject" className={`flex-1 ${inp}`} />
+                          
+                          {/* Updated Select Styling for better visibility */}
+                          <select 
+                            value={sub.grade} 
+                            onChange={(e) => updateCollegeSubject(si, sj, "grade", e.target.value)}
+                            className={selectInp}
+                          >
+                            {["O", "A+", "A", "B+", "B", "C", "U"].map(g => (
+                              <option key={g} value={g} className="bg-white text-black font-bold">{g}</option>
+                            ))}
+                          </select>
+                          
+                          <button onClick={() => removeCollegeSubject(si, sj)} className="text-destructive/60 hover:text-destructive"><Trash2 className="w-3 h-3" /></button>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => addCollegeSubject(si)} className="text-xs text-primary flex items-center gap-1 mt-3 hover:underline font-bold">
+                      <Plus className="w-3 h-3" /> Add Subject
+                    </button>
                   </div>
                 ))}
-                <button onClick={addSemester} className="w-full py-2 text-xs font-mono text-primary border border-primary/30 rounded-lg">Add Semester</button>
+                <button onClick={addSemester} className="w-full py-2.5 text-xs font-mono text-primary border border-primary/40 rounded-lg hover:bg-primary/10 transition-all flex items-center justify-center gap-2">
+                  <Plus className="w-4 h-4" /> Add New Semester
+                </button>
               </div>
 
-              <button onClick={handleSave} className="w-full mt-6 py-3 bg-primary text-primary-foreground font-semibold rounded-lg flex items-center justify-center gap-2">
-                <Save className="w-4 h-4" /> Save Changes
-              </button>
+              <motion.button 
+                onClick={handleSave} 
+                whileHover={{ scale: 1.02 }} 
+                whileTap={{ scale: 0.98 }} 
+                className="w-full mt-8 py-3.5 bg-primary text-primary-foreground font-display font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all"
+              >
+                <Save className="w-5 h-5" /> Save Academic Records
+              </motion.button>
             </motion.div>
           </motion.div>
         )}
