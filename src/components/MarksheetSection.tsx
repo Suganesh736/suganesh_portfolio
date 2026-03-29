@@ -6,7 +6,7 @@ import { loadContent, saveContent } from "@/lib/portfolio-db";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-/* ───────── Grade System ───────── */
+/* ✅ Grade System */
 const gradePoints: any = {
   "O": 10,
   "A+": 9,
@@ -29,7 +29,7 @@ const calcCGPA = (college: any[]) => {
   return college.length ? Number((total / college.length).toFixed(2)) : 0;
 };
 
-/* ───────── Types ───────── */
+/* Types */
 interface SubjectMark {
   name: string;
   marks: number;
@@ -44,6 +44,7 @@ interface SchoolRecord {
   subjects: SubjectMark[];
 }
 
+/* ✅ CHANGED */
 interface CollegeSubject {
   name: string;
   grade: string;
@@ -62,7 +63,7 @@ interface MarksheetData {
   college: CollegeSemester[];
 }
 
-/* ───────── Default Data ───────── */
+/* Default */
 const defaultData: MarksheetData = {
   school: [
     {
@@ -80,7 +81,7 @@ const defaultData: MarksheetData = {
     {
       name: "Semester 1",
       subjects: [
-        { name: "Maths", grade: "A+" },
+        { name: "Mathematics I", grade: "A+" },
         { name: "Physics", grade: "B+" },
       ],
       sgpa: 0,
@@ -90,7 +91,6 @@ const defaultData: MarksheetData = {
   ],
 };
 
-/* ───────── Component ───────── */
 const MarksheetSection = () => {
   const [data, setData] = useState(defaultData);
   const [editMode, setEditMode] = useState(false);
@@ -109,7 +109,7 @@ const MarksheetSection = () => {
     await saveContent("marksheet_v3", editData);
   };
 
-  /* ───── PDF ───── */
+  /* PDF */
   const handleDownloadPdf = () => {
     const doc = new jsPDF();
 
@@ -117,7 +117,10 @@ const MarksheetSection = () => {
       autoTable(doc, {
         head: [["Subject", "Grade"]],
         body: sem.subjects.map((s) => [s.name, s.grade]),
-        foot: [[`SGPA: ${calcSGPA(sem.subjects)}`, `CGPA: ${calcCGPA(data.college)}`]],
+        foot: [[
+          `SGPA: ${calcSGPA(sem.subjects)}`,
+          `CGPA: ${calcCGPA(data.college)}`
+        ]],
       });
     });
 
@@ -125,13 +128,13 @@ const MarksheetSection = () => {
   };
 
   return (
-    <section>
-      <h2>Education & Marksheet</h2>
+    <section className="section-padding">
+      <h2 className="text-3xl font-bold text-center mb-6">Education & Marksheet</h2>
 
       {/* SCHOOL */}
       {data.school.map((rec, i) => (
-        <div key={i}>
-          <h3>{rec.label}</h3>
+        <div key={i} className="glass-card p-4 mb-4">
+          <h3 className="font-bold text-primary">{rec.label}</h3>
           {rec.subjects.map((s, j) => (
             <p key={j}>{s.name} - {s.marks}</p>
           ))}
@@ -140,8 +143,8 @@ const MarksheetSection = () => {
 
       {/* COLLEGE */}
       {data.college.map((sem, i) => (
-        <div key={i}>
-          <h3>{sem.name}</h3>
+        <div key={i} className="glass-card p-4 mb-4">
+          <h3 className="font-bold">{sem.name}</h3>
 
           <p>SGPA: {calcSGPA(sem.subjects)}</p>
           <p>CGPA: {sem.manualCgpa ? sem.cgpa : calcCGPA(data.college)}</p>
@@ -152,66 +155,79 @@ const MarksheetSection = () => {
         </div>
       ))}
 
-      <button onClick={() => setEditMode(true)}>Edit</button>
-      <button onClick={handleDownloadPdf}>Download PDF</button>
+      <div className="flex gap-3 justify-center mt-4">
+        <button onClick={() => setEditMode(true)} className="btn">Edit</button>
+        <button onClick={handleDownloadPdf} className="btn">Download PDF</button>
+      </div>
 
-      {editMode && (
-        <div>
-          {editData.college.map((sem, si) => (
-            <div key={si}>
-              <input value={sem.name} />
+      {/* EDIT */}
+      <AnimatePresence>
+        {editMode && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg w-96">
 
-              <label>
-                <input
-                  type="checkbox"
-                  checked={sem.manualCgpa}
-                  onChange={(e) => {
-                    const d = JSON.parse(JSON.stringify(editData));
-                    d.college[si].manualCgpa = e.target.checked;
-                    setEditData(d);
-                  }}
-                />
-                Manual CGPA
-              </label>
+              {editData.college.map((sem, si) => (
+                <div key={si} className="mb-4">
 
-              <input
-                type="number"
-                value={sem.cgpa}
-                disabled={!sem.manualCgpa}
-                onChange={(e) => {
-                  const d = JSON.parse(JSON.stringify(editData));
-                  d.college[si].cgpa = Number(e.target.value);
-                  setEditData(d);
-                }}
-              />
+                  <input value={sem.name} className="w-full mb-2" />
 
-              {sem.subjects.map((s, sj) => (
-                <div key={sj}>
-                  <input value={s.name} />
-                  <select
-                    value={s.grade}
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={sem.manualCgpa}
+                      onChange={(e) => {
+                        const d = JSON.parse(JSON.stringify(editData));
+                        d.college[si].manualCgpa = e.target.checked;
+                        setEditData(d);
+                      }}
+                    />
+                    Manual CGPA
+                  </label>
+
+                  <input
+                    type="number"
+                    value={sem.cgpa}
+                    disabled={!sem.manualCgpa}
                     onChange={(e) => {
                       const d = JSON.parse(JSON.stringify(editData));
-                      d.college[si].subjects[sj].grade = e.target.value;
+                      d.college[si].cgpa = Number(e.target.value);
                       setEditData(d);
                     }}
-                  >
-                    <option>O</option>
-                    <option>A+</option>
-                    <option>A</option>
-                    <option>B+</option>
-                    <option>B</option>
-                    <option>C</option>
-                    <option>U</option>
-                  </select>
+                    className="w-full mb-2"
+                  />
+
+                  {sem.subjects.map((s, sj) => (
+                    <div key={sj} className="flex gap-2 mb-2">
+                      <input value={s.name} className="flex-1" />
+                      <select
+                        value={s.grade}
+                        onChange={(e) => {
+                          const d = JSON.parse(JSON.stringify(editData));
+                          d.college[si].subjects[sj].grade = e.target.value;
+                          setEditData(d);
+                        }}
+                      >
+                        <option>O</option>
+                        <option>A+</option>
+                        <option>A</option>
+                        <option>B+</option>
+                        <option>B</option>
+                        <option>C</option>
+                        <option>U</option>
+                      </select>
+                    </div>
+                  ))}
                 </div>
               ))}
-            </div>
-          ))}
 
-          <button onClick={handleSave}>Save</button>
-        </div>
-      )}
+              <button onClick={handleSave} className="w-full bg-blue-500 text-white p-2 rounded">
+                Save
+              </button>
+
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
