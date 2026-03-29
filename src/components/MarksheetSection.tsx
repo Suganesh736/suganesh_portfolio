@@ -211,11 +211,12 @@ const MarksheetSection = () => {
     });
   };
 
-  // Input styling
   const inp = "px-3 py-1.5 bg-muted/40 border border-glass-border/40 rounded text-foreground font-body text-xs focus:outline-none focus:border-primary/70 transition-all";
-  
-  // High contrast select for better visibility
   const selectInp = "px-3 py-1.5 bg-white text-black border border-primary/50 rounded font-bold text-xs focus:outline-none focus:ring-2 focus:ring-primary transition-all cursor-pointer";
+
+  // Table styling classes
+  const tableBorder = "border border-glass-border/40";
+  const cellPadding = "py-3 px-4";
 
   return (
     <section id="marksheet" className="section-padding relative overflow-hidden">
@@ -240,27 +241,27 @@ const MarksheetSection = () => {
             <School className="w-5 h-5 text-secondary" />
             <h3 className="font-display text-xl font-bold text-foreground">School Records</h3>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-8">
             {data.school.map((rec, i) => (
-              <div key={i} className="glass-card p-6 hover:neon-glow-purple transition-all duration-300">
+              <div key={i} className="glass-card p-6 overflow-hidden">
                 <h4 className="font-display text-lg font-bold text-primary mb-4">{rec.label}</h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto rounded-lg border border-glass-border/40">
+                  <table className="w-full text-sm border-collapse">
                     <thead>
-                      <tr className="border-b border-glass-border/30">
-                        <th className="text-left py-2 px-3 text-muted-foreground">Subject</th>
-                        <th className="text-center py-2 px-3 text-muted-foreground">Marks</th>
-                        <th className="text-center py-2 px-3 text-muted-foreground">Max</th>
-                        <th className="text-center py-2 px-3 text-muted-foreground">%</th>
+                      <tr className="bg-muted/30 border-b border-glass-border/50">
+                        <th className={`text-left ${cellPadding} text-muted-foreground font-bold border-r border-glass-border/40`}>Subject</th>
+                        <th className={`text-center ${cellPadding} text-muted-foreground font-bold border-r border-glass-border/40`}>Marks</th>
+                        <th className={`text-center ${cellPadding} text-muted-foreground font-bold border-r border-glass-border/40`}>Max</th>
+                        <th className={`text-center ${cellPadding} text-muted-foreground font-bold`}>%</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rec.subjects.map((sub, j) => (
-                        <tr key={j} className="border-b border-glass-border/10">
-                          <td className="py-2 px-3 text-foreground">{sub.name}</td>
-                          <td className="py-2 px-3 text-center text-foreground">{sub.marks}</td>
-                          <td className="py-2 px-3 text-center text-muted-foreground">{sub.maxMarks}</td>
-                          <td className="py-2 px-3 text-center">
+                        <tr key={j} className="border-b border-glass-border/40 hover:bg-white/5 transition-colors">
+                          <td className={`${cellPadding} text-foreground font-medium border-r border-glass-border/40`}>{sub.name}</td>
+                          <td className={`${cellPadding} text-center text-foreground border-r border-glass-border/40`}>{sub.marks}</td>
+                          <td className={`${cellPadding} text-center text-muted-foreground border-r border-glass-border/40`}>{sub.maxMarks}</td>
+                          <td className={`${cellPadding} text-center`}>
                             <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">
                               {((sub.marks / sub.maxMarks) * 100).toFixed(0)}%
                             </span>
@@ -268,6 +269,13 @@ const MarksheetSection = () => {
                         </tr>
                       ))}
                     </tbody>
+                    <tfoot className="bg-primary/5">
+                      <tr className="font-bold border-t border-glass-border/50">
+                        <td className={`${cellPadding} text-foreground border-r border-glass-border/40`}>Total Percentage</td>
+                        <td colSpan={2} className={`${cellPadding} border-r border-glass-border/40`}></td>
+                        <td className={`${cellPadding} text-center text-primary`}>{calcPct(rec.subjects)}%</td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               </div>
@@ -276,12 +284,12 @@ const MarksheetSection = () => {
         </div>
 
         {/* ═══ College Semesters ═══ */}
-        <div>
+        <div className="mb-10">
           <div className="flex items-center gap-2 mb-4">
             <GraduationCap className="w-5 h-5 text-primary" />
             <h3 className="font-display text-xl font-bold text-foreground">College Semesters</h3>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-8">
             {data.college.map((sem, si) => (
               <div key={si} className="glass-card p-6">
                 <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
@@ -291,20 +299,20 @@ const MarksheetSection = () => {
                     <span className="text-xs font-mono px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 font-bold">CGPA: {sem.cgpa}</span>
                   </div>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto rounded-lg border border-glass-border/40">
+                  <table className="w-full text-sm border-collapse">
                     <thead>
-                      <tr className="border-b border-glass-border/30">
-                        <th className="text-left py-2 px-3 text-muted-foreground">Subject</th>
-                        <th className="text-center py-2 px-3 text-muted-foreground">Grade</th>
+                      <tr className="bg-muted/30 border-b border-glass-border/50">
+                        <th className={`text-left ${cellPadding} text-muted-foreground font-bold border-r border-glass-border/40`}>Subject</th>
+                        <th className={`text-center ${cellPadding} text-muted-foreground font-bold`}>Grade</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sem.subjects.map((sub, sj) => (
-                        <tr key={sj} className="border-b border-glass-border/10">
-                          <td className="py-2 px-3 text-foreground font-medium">{sub.name}</td>
-                          <td className="py-2 px-3 text-center">
-                            <span className={`font-mono font-bold text-sm ${sub.grade === 'U' ? 'text-red-400' : 'text-primary'}`}>
+                        <tr key={sj} className="border-b border-glass-border/40 hover:bg-white/5 transition-colors">
+                          <td className={`${cellPadding} text-foreground font-medium border-r border-glass-border/40`}>{sub.name}</td>
+                          <td className={`${cellPadding} text-center`}>
+                            <span className={`font-mono font-bold text-sm px-3 py-1 rounded ${sub.grade === 'U' ? 'bg-red-500/10 text-red-400' : 'bg-primary/10 text-primary'}`}>
                               {sub.grade}
                             </span>
                           </td>
@@ -319,7 +327,7 @@ const MarksheetSection = () => {
         </div>
       </div>
 
-      {/* ═══ Edit Modal ═══ */}
+      {/* ═══ Edit Modal (No major changes here) ═══ */}
       <AnimatePresence>
         {editMode && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-background/90 backdrop-blur-md" onClick={() => setEditMode(false)}>
@@ -330,57 +338,36 @@ const MarksheetSection = () => {
               </div>
 
               {/* College Edit Section */}
-              <h4 className="font-display text-sm font-bold text-primary mb-3">College Semesters (Manual GPA Entry)</h4>
+              <h4 className="font-display text-sm font-bold text-primary mb-3">College Semesters</h4>
               <div className="space-y-6">
                 {editData.college.map((sem, si) => (
                   <div key={si} className="border border-glass-border/30 rounded-lg p-5 bg-black/20">
                     <div className="flex items-center gap-2 mb-4">
                       <input value={sem.name} onChange={(e) => updateCollegeField(si, "name", e.target.value)} className={`flex-1 ${inp}`} />
-                      <button onClick={() => removeSemester(si)} className="text-destructive hover:scale-110 transition-transform"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => removeSemester(si)} className="text-destructive"><Trash2 className="w-4 h-4" /></button>
                     </div>
 
-                    {/* Manual GPA Inputs */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="space-y-1">
                         <label className="text-[10px] text-secondary uppercase font-bold tracking-tighter">Semester SGPA</label>
-                        <input 
-                          type="number" 
-                          step="0.01" 
-                          value={sem.sgpa} 
-                          onChange={(e) => updateCollegeField(si, "sgpa", parseFloat(e.target.value) || 0)} 
-                          className={`w-full text-center font-bold ${inp}`} 
-                        />
+                        <input type="number" step="0.01" value={sem.sgpa} onChange={(e) => updateCollegeField(si, "sgpa", parseFloat(e.target.value) || 0)} className={`w-full text-center font-bold ${inp}`} />
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] text-primary uppercase font-bold tracking-tighter">Overall CGPA</label>
-                        <input 
-                          type="number" 
-                          step="0.01" 
-                          value={sem.cgpa} 
-                          onChange={(e) => updateCollegeField(si, "cgpa", parseFloat(e.target.value) || 0)} 
-                          className={`w-full text-center font-bold ${inp}`} 
-                        />
+                        <input type="number" step="0.01" value={sem.cgpa} onChange={(e) => updateCollegeField(si, "cgpa", parseFloat(e.target.value) || 0)} className={`w-full text-center font-bold ${inp}`} />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-[10px] text-muted-foreground font-mono">Subjects & Grades</p>
                       {sem.subjects.map((sub, sj) => (
                         <div key={sj} className="flex gap-2 items-center">
                           <input value={sub.name} onChange={(e) => updateCollegeSubject(si, sj, "name", e.target.value)} placeholder="Subject" className={`flex-1 ${inp}`} />
-                          
-                          {/* Updated Select Styling for better visibility */}
-                          <select 
-                            value={sub.grade} 
-                            onChange={(e) => updateCollegeSubject(si, sj, "grade", e.target.value)}
-                            className={selectInp}
-                          >
+                          <select value={sub.grade} onChange={(e) => updateCollegeSubject(si, sj, "grade", e.target.value)} className={selectInp}>
                             {["O", "A+", "A", "B+", "B", "C", "U"].map(g => (
                               <option key={g} value={g} className="bg-white text-black font-bold">{g}</option>
                             ))}
                           </select>
-                          
-                          <button onClick={() => removeCollegeSubject(si, sj)} className="text-destructive/60 hover:text-destructive"><Trash2 className="w-3 h-3" /></button>
+                          <button onClick={() => removeCollegeSubject(si, sj)} className="text-destructive/60"><Trash2 className="w-3 h-3" /></button>
                         </div>
                       ))}
                     </div>
@@ -389,17 +376,12 @@ const MarksheetSection = () => {
                     </button>
                   </div>
                 ))}
-                <button onClick={addSemester} className="w-full py-2.5 text-xs font-mono text-primary border border-primary/40 rounded-lg hover:bg-primary/10 transition-all flex items-center justify-center gap-2">
+                <button onClick={addSemester} className="w-full py-2.5 text-xs font-mono text-primary border border-primary/40 rounded-lg flex items-center justify-center gap-2">
                   <Plus className="w-4 h-4" /> Add New Semester
                 </button>
               </div>
 
-              <motion.button 
-                onClick={handleSave} 
-                whileHover={{ scale: 1.02 }} 
-                whileTap={{ scale: 0.98 }} 
-                className="w-full mt-8 py-3.5 bg-primary text-primary-foreground font-display font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all"
-              >
+              <motion.button onClick={handleSave} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full mt-8 py-3.5 bg-primary text-primary-foreground font-display font-bold rounded-xl flex items-center justify-center gap-2">
                 <Save className="w-5 h-5" /> Save Academic Records
               </motion.button>
             </motion.div>
